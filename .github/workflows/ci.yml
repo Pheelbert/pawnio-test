@@ -1,0 +1,47 @@
+name: build
+
+# Compile every module and build the host on every push / PR. The compiled
+# .amx modules are uploaded as an artifact you can download and load on a
+# Windows machine (unrestricted driver) without installing a compiler locally.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  modules:
+    name: Compile Pawn modules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install RPM extraction tools
+        run: sudo apt-get update && sudo apt-get install -y rpm2cpio cpio
+
+      - name: Build modules
+        run: ./scripts/build.sh
+
+      - name: Show results
+        run: ls -l build
+
+      - name: Upload compiled modules
+        uses: actions/upload-artifact@v4
+        with:
+          name: modules
+          path: build/*.amx
+          if-no-files-found: error
+
+  host:
+    name: Build C# host
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # DllImport is resolved at runtime, so the host compiles fine on Linux
+      # even though PawnIOLib.dll only exists on Windows.
+      - name: Build
+        run: dotnet build -c Release --nologo host/csharp

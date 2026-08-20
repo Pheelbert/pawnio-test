@@ -1,0 +1,28 @@
+# build outputs
+/build/
+*.amx
+*.lst
+
+# fetched at build/run time (not committed)
+# .tools = downloaded pawncc compiler; .pawnio = installer/zips;
+# official-modules = downloaded official signed *.bin modules
+/.tools/
+/.pawnio/
+/official-modules/
+
+# C#
+host/csharp/bin/
+host/csharp/obj/
+**/bin/
+**/obj/
+
+# Python
+__pycache__/
+*.pyc
+
+# editor / OS
+.vs/
+.vscode/
+*.user
+Thumbs.db
+.DS_Store
