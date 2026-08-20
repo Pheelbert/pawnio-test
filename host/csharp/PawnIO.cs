@@ -144,8 +144,8 @@ public sealed class PawnIoModule : IDisposable
                   out var returnSize),
               $"pawnio_execute(\"{name}\")");
 
-        var cells = (int)(returnSize / sizeof(ulong));
-        if (cells is < 0 or > 4096) cells = outCount; // defend against odd values
+        var cells = (int)returnSize;
+        if (cells is < 0 or > 4096) cells = outCount;
         Array.Resize(ref outBuf, Math.Min(cells, outCount));
         return outBuf;
     }

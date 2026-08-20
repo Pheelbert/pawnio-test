@@ -120,7 +120,7 @@ class PawnIO:
             ),
             f'pawnio_execute("{name}")',
         )
-        cells = ret.value // ctypes.sizeof(c_uint64)
+        cells = ret.value
         return list(out_arr[: min(cells, out_count)])
 
     def close(self) -> None:
