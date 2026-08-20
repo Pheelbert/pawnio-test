@@ -10,6 +10,9 @@
 /.pawnio/
 /official-modules/
 
+# PawnIO source tree (reference only, not part of this project)
+/PawnIO-src/
+
 # C#
 host/csharp/bin/
 host/csharp/obj/
