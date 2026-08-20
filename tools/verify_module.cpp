@@ -328,8 +328,17 @@ int main(int argc, char* argv[]) {
                        keys[ki].name, (unsigned)status);
                 matched = 1;
                 break;
+            } else if (status == (NTSTATUS)0xC000A000) {
+                printf("  [MISMATCH] key=\"%s\" STATUS_INVALID_SIGNATURE (0xC000A000)\n",
+                       keys[ki].name);
+                printf("             Valid RSA ciphertext, PKCS1 padding OK, but hash mismatch\n");
+                printf("             (signed by a different private key)\n");
+            } else if (status == (NTSTATUS)0xC000000D) {
+                printf("  [MISMATCH] key=\"%s\" STATUS_INVALID_PARAMETER (0xC000000D)\n",
+                       keys[ki].name);
+                printf("             Signature is not valid RSA ciphertext (bad padding/garbage)\n");
             } else {
-                printf("  [MISMATCH] No match with key \"%s\" (status=0x%08X)\n",
+                printf("  [MISMATCH] key=\"%s\" (status=0x%08X)\n",
                        keys[ki].name, (unsigned)status);
             }
         }
