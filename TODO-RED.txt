@@ -10,3 +10,19 @@ B) Force return successful status by patching .sys in memory
 Interesting files:
 - D:\Projects\pawnio-test\PawnIO-src\PawnIO\src\signature.cpp
 - D:\Projects\pawnio-test\PawnIO-src\PawnIO\src\vm.cpp
+
+# Commands
+## Build custom modules
+.\scripts\build.ps1
+
+## Signing test tools
+.\tools\build.bat
+.\tools\sign_module.exe .\build\hello.amx .\build\hello_signed.bin
+.\tools\verify_module.exe .\build\echo_fakesig.bin
+
+## Should work due to valid officially signed module
+dotnet run --project host\csharp -- run official-modules\Echo.bin ioctl_not 1 0x12345678
+
+## Should fail due to invalid signature
+dotnet run --project host\csharp -- run build\echo_signed.bin ioctl_not 1 0x12345678
+dotnet run --project host\csharp -- hello build\hello_signed.bin 0xCAFE
