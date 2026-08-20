@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- PawnIOLib.dll is native x64, so the host must run as x64. -->
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>pawnlab</AssemblyName>
+    <RootNamespace>PawnIoLab</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+</Project>
