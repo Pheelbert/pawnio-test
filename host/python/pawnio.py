@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """pawnio.py — a zero-dependency ctypes wrapper over PawnIOLib.dll.
 
 This is the "no build required" way to talk to PawnIO: install the driver, then

@@ -14,8 +14,8 @@ Files:
     extra.inc      Windows/PawnIO helpers (get_cpu_vendor, get_cpu_fms, ...)
     pawnio.inc     umbrella include + the DEFINE_IOCTL / DEFINE_IOCTL_SIZED macros
 
-To refresh them to the latest upstream:
-    ./scripts/refresh-headers.sh
+To refresh them to the latest upstream, manually copy the files from:
+    https://github.com/namazso/PawnIO.Modules/tree/master/include
 
 If you contribute a module upstream, build against the upstream include/ dir
 instead of this vendored copy so you track any header changes.

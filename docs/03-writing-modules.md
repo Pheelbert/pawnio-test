@@ -112,7 +112,7 @@ cpu_restore_affinity(old);          // always restore
    preprocessor → `error 049`. Don't end comment lines with a backslash (this
    repo hit it once in an ASCII diagram — see the git history of `sysinfo.p`).
 3. **`main()` with a single native call** can misbehave; touch two.
-4. **Semicolons & parentheses are required** (`-;+ -(+`). Always terminate
+4. **Semicolons & parentheses are required.** Always terminate
    statements and parenthesize `if (...)`.
 5. **The default prefix include collides** with PawnIO's `core.inc` (both define
    `min`, `max`, …). The build passes **`-p`** to block it — use the provided
@@ -122,19 +122,17 @@ cpu_restore_affinity(old);          // always restore
 
 Use the scripts (they pin the exact compiler and flags):
 
-```bash
-./scripts/build.sh              # Linux/macOS/WSL/CI  -> build/*.amx
-# or on Windows:  scripts\build.ps1
+```powershell
+scripts\build.ps1               # -> build\*.amx
 ```
 
 Under the hood it runs, per module:
 
 ```
-pawncc modules/<name>.p -imodules/include -C64 -;+ -(+ -p -obuild/<name>.amx
+pawncc modules\<name>.p -imodules\include -C64 -p -obuild\<name>.amx
 ```
 
-- `-C64` 64-bit cells · `-;+` require semicolons · `-(+` require parentheses
-- `-p` block the default prefix include · `-i` header search path
+- `-C64` 64-bit cells · `-p` block the default prefix include · `-i` header search path
 
 The output `.amx` is raw bytecode. To *load* it you wrap it in a blob — see the
 [user-space API](04-userspace-api.md) — and you need the right driver edition

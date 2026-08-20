@@ -71,8 +71,8 @@ Full explanation: [`docs/05-signing-and-editions.md`](docs/05-signing-and-editio
 ### 0. Get the tools
 - **Windows** to actually load the driver (PawnIO is a Windows kernel driver).
 - **.NET 8 SDK** for the C# host (or just use the Python host — no build).
-- A **Pawn compiler** only if you want to build modules locally; `build.sh`
-  fetches it for you, or CI builds them for you.
+- A **Pawn compiler** only if you want to build modules locally; CI builds
+  them for you, or place `pawncc.exe` in `.tools\`.
 
 ### Lane A — signed driver + official modules (no test signing)
 
@@ -90,7 +90,6 @@ dotnet run --project host\csharp -- run official-modules\Echo.bin ioctl_not 1 0x
 ```powershell
 scripts\fetch-pawnio.ps1 -Unrestricted   # installs dev driver (enables test signing)
 
-# Build the modules (Windows). On Linux/WSL/macOS use ./scripts/build.sh instead.
 scripts\build.ps1                         # -> build\*.amx
 
 # Read CPUID the deep way — module does cpuid, host decodes the strings:
@@ -104,16 +103,6 @@ No .NET? The Python host is identical and needs no build:
 ```powershell
 python host\python\pawnio.py cpuid build\cpuid.amx
 ```
-
-### Build modules anywhere (no Windows needed)
-
-Compiling is just bytecode generation, so it runs on Linux/macOS/WSL/CI:
-
-```bash
-./scripts/build.sh          # downloads the pinned pawncc, compiles modules/ -> build/
-```
-
-…or grab the `modules` artifact from the GitHub Actions run.
 
 ---
 
@@ -142,7 +131,7 @@ is in [`docs/02-native-functions.md`](docs/02-native-functions.md).
 modules/            your Pawn modules (.p) + vendored PawnIO headers (include/)
 host/csharp/        C# console host over PawnIOLib.dll  (primary)
 host/python/        ctypes host — zero build
-scripts/            build.sh / build.ps1 / fetch-pawnio.ps1 / run-demo.ps1
+scripts/            build.ps1 / fetch-pawnio.ps1 / run-demo.ps1
 docs/               deep-dive guides (start with 01-architecture.md)
 .github/workflows/  CI: compiles modules on every push, uploads artifacts
 ```

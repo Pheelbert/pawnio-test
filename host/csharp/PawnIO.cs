@@ -84,7 +84,7 @@ public sealed class PawnIoException(string what, int hr)
     private static string Describe(int hr) => (uint)hr switch
     {
         0x80070005 => "E_ACCESSDENIED — run as Administrator",
-        0x80070002 => "file not found — is the module blob path correct?",
+        0x80070002 => "not found - check the module path or function name",
         0x8007007E => "PawnIOLib.dll not found — install PawnIO first",
         0xD0000225 => "STATUS_NOT_FOUND — no such exported function in the module",
         _ => "see winerror.h / ntstatus.h"

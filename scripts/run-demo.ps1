@@ -10,7 +10,7 @@
       * if official-modules\Echo.bin exists (signed driver), it runs that too.
 
     It never installs anything. Run scripts\fetch-pawnio.ps1 first to get the
-    driver, and scripts\build.ps1 (or build.sh) to compile your modules.
+    driver, and scripts\build.ps1 to compile your modules.
 
 .NOTES
     Run elevated (Administrator). SPDX-License-Identifier: 0BSD
@@ -50,14 +50,14 @@ if (Test-Path (Join-Path $Build 'hello.amx')) {
     Invoke-Lab cpuid   (Join-Path $Build 'cpuid.amx')
     Invoke-Lab sysinfo (Join-Path $Build 'sysinfo.amx')
 } else {
-    Write-Host "  (no build\*.amx yet — run scripts\build.ps1 to compile your modules)" -ForegroundColor DarkGray
+    Write-Host "  (no build\*.amx yet - run scripts\build.ps1 to compile your modules)" -ForegroundColor DarkGray
 }
 
 if (Test-Path (Join-Path $Official 'Echo.bin')) {
     Write-Step "Official signed module: Echo (ioctl_not)"
     Invoke-Lab run (Join-Path $Official 'Echo.bin') ioctl_not 1 0x12345678
 } else {
-    Write-Host "  (no official-modules\Echo.bin — run fetch-pawnio.ps1 -Modules)" -ForegroundColor DarkGray
+    Write-Host "  (no official-modules\Echo.bin - run fetch-pawnio.ps1 -Modules)" -ForegroundColor DarkGray
 }
 
 Write-Step "Demo complete."

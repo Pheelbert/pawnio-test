@@ -36,7 +36,7 @@ real hardware.
    (port I/O to a Super-I/O chip), then `SmbusI801.p` (PCI + MMIO + a protocol).
    These are compact and show the natives used the way real tools use them.
 4. **Write your own:** copy `hello.p`, add an `ioctl_` that reads a register you
-   care about on your board, build with `scripts/build.sh`, and call it from the
+   care about on your board, build with `scripts\build.ps1`, and call it from the
    host. Whitelist aggressively.
 
 ## Where the official modules live

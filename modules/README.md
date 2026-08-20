@@ -5,19 +5,18 @@ them in this order: `hello` → `echo` → `cpuid` → `msr` → `sysinfo` → `
 
 `include/` holds the PawnIO headers, vendored from
 [namazso/PawnIO.Modules](https://github.com/namazso/PawnIO.Modules) (0BSD; see
-`include/NOTICE`). Refresh with `../scripts/refresh-headers.sh`.
+`include/NOTICE`).
 
 ## Build
 
-```bash
-../scripts/build.sh            # Linux/macOS/WSL/CI -> ../build/*.amx
-# or on Windows:  ..\scripts\build.ps1
+```powershell
+..\scripts\build.ps1              # -> ..\build\*.amx
 ```
 
 Each module compiles with the official flags:
 
 ```
-pawncc <name>.p -iinclude -C64 -;+ -(+ -p
+pawncc <name>.p -iinclude -C64 -p
 ```
 
 See [`../docs/03-writing-modules.md`](../docs/03-writing-modules.md) for the

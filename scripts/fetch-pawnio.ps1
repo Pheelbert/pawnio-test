@@ -92,13 +92,12 @@ if ($NoInstall) {
 # 2. Install ----------------------------------------------------------------
 if ($Unrestricted) {
     Write-Warn "Unrestricted edition selected."
-    Write-Warn "The installer will open interactively — choose the UNRESTRICTED edition."
+    Write-Warn "The installer will open interactively - choose the UNRESTRICTED edition."
     Write-Warn "It requires Windows test signing (the installer explains how); a reboot is expected."
     Start-Process -FilePath $installer -Wait
 } else {
     Write-Step "Installing the officially SIGNED edition (silent)..."
-    $p = Start-Process -FilePath $installer `
-        -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait -PassThru
+    $p = Start-Process -FilePath $installer -ArgumentList '-silent','-install' -Wait -PassThru
     if ($p.ExitCode -ne 0) {
         Write-Warn "Installer exit code $($p.ExitCode). If it failed, run it interactively: $installer"
     }
@@ -147,4 +146,4 @@ if ($Modules) {
     Write-Host "    (release $($rel.tag_name))"
 }
 
-Write-Step "Done. Try:  dotnet run --project host\csharp -- version"
+Write-Step 'Done. Try:  dotnet run --project host\csharp -- version'

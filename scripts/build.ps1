@@ -1,18 +1,16 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Compile modules\*.p into build\*.amx on Windows.
+    Compile modules\*.p into build\*.amx.
 
 .DESCRIPTION
     Building modules needs the Pawn compiler (pawncc), NOT the Windows DDK — you
     are compiling bytecode, not a driver. This script finds a compiler in order:
 
-      1. pawncc.exe on PATH or in .tools\
-      2. otherwise, if WSL is available, it delegates to scripts/build.sh, which
-         downloads the exact pinned compiler and builds there.
-
-    If neither is available it prints how to get one. The simplest option on
-    Windows is usually WSL ("wsl --install"), which then "just works".
+      1. pawncc.exe on PATH
+      2. pawncc.exe in .tools\
+      3. auto-downloads the CompuPhase Pawn toolkit installer into .tools\ and
+         extracts pawncc.exe from it.
 
 .PARAMETER Modules
     Specific module names to build (default: all).
@@ -32,9 +30,14 @@ $RepoRoot   = Split-Path -Parent $PSScriptRoot
 $ModulesDir = Join-Path $RepoRoot 'modules'
 $IncludeDir = Join-Path $ModulesDir 'include'
 $OutDir     = Join-Path $RepoRoot 'build'
+$ToolsDir   = Join-Path $RepoRoot '.tools'
 
-# Same flags the official modules use: 64-bit cells, strict syntax, no default prefix.
-$Flags = @('-C64', '-;+', '-(+', '-p')
+$PawnVersion    = '4.1.7487'
+$PawnInstallerUrl = "https://www.compuphase.com/pawn/pawn-$PawnVersion.exe"
+
+# 64-bit cells (the default since 4.1.7487, but explicit for clarity) and no
+# default prefix include (avoids collisions with PawnIO's core.inc).
+$Flags = @('-C64', '-p')
 
 function Write-Step($m) { Write-Host "==> $m" -ForegroundColor Cyan }
 
@@ -42,33 +45,50 @@ function Find-Pawncc {
     $onPath = Get-Command 'pawncc.exe','pawncc' -ErrorAction SilentlyContinue |
         Select-Object -First 1
     if ($onPath) { return $onPath.Source }
-    $cached = Join-Path $RepoRoot '.tools\pawncc.exe'
+    $cached = Join-Path $ToolsDir 'pawncc.exe'
     if (Test-Path $cached) { return $cached }
     return $null
 }
 
+function Install-Pawncc {
+    Write-Step "Downloading Pawn compiler v$PawnVersion..."
+    New-Item -ItemType Directory -Force -Path $ToolsDir | Out-Null
+
+    $installer = Join-Path $ToolsDir "pawn-$PawnVersion.exe"
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Invoke-WebRequest -Uri $PawnInstallerUrl -OutFile $installer -UseBasicParsing
+    Write-Host ("    downloaded {0:N0} bytes" -f (Get-Item $installer).Length)
+
+    # NSIS installer: /S = silent, /D= = install directory (no quotes, must be last).
+    Write-Step "Installing Pawn compiler to $ToolsDir\pawn..."
+    $installDir = Join-Path $ToolsDir 'pawn'
+    $p = Start-Process -FilePath $installer `
+        -ArgumentList "/S","/D=$installDir" `
+        -Wait -PassThru
+    if ($p.ExitCode -ne 0) {
+        throw "Pawn installer failed with exit code $($p.ExitCode)."
+    }
+
+    # Copy pawncc.exe (and its DLL) up to .tools\ for easy discovery.
+    $binDir = Join-Path $installDir 'bin'
+    if (-not (Test-Path $binDir)) { $binDir = $installDir }
+    $files = @()
+    $files += Get-ChildItem -Path $binDir -Filter 'pawncc*' -ErrorAction SilentlyContinue
+    $files += Get-ChildItem -Path $binDir -Filter 'pawnc.dll' -ErrorAction SilentlyContinue
+    foreach ($f in $files) {
+        Copy-Item $f.FullName -Destination $ToolsDir -Force
+    }
+
+    $result = Join-Path $ToolsDir 'pawncc.exe'
+    if (-not (Test-Path $result)) {
+        throw "pawncc.exe not found after install. Check $ToolsDir\pawn for the compiler."
+    }
+    return $result
+}
+
 $pawncc = Find-Pawncc
 if (-not $pawncc) {
-    # Fall back to WSL + the shell build if we can.
-    if (Get-Command 'wsl.exe' -ErrorAction SilentlyContinue) {
-        Write-Step "No pawncc.exe found; building via WSL (scripts/build.sh)..."
-        Push-Location $RepoRoot
-        try   { & wsl.exe bash ./scripts/build.sh @Modules }
-        finally { Pop-Location }
-        exit $LASTEXITCODE
-    }
-    Write-Host @"
-error: no Pawn compiler found.
-
-Pick one of these (any works):
-  * Install WSL, then re-run this script:   wsl --install
-    (it will build with the exact pinned compiler automatically)
-  * Put a Windows pawncc.exe (CompuPhase Pawn 4.1.x) at:
-        $($RepoRoot)\.tools\pawncc.exe
-  * Or just download the compiled modules from GitHub Actions
-    (Actions tab -> latest run -> 'modules' artifact).
-"@ -ForegroundColor Red
-    exit 1
+    $pawncc = Install-Pawncc
 }
 
 Write-Step "Using compiler: $pawncc"
@@ -89,12 +109,17 @@ foreach ($src in $sources) {
     $name = [IO.Path]::GetFileNameWithoutExtension($src)
     $amx  = Join-Path $OutDir "$name.amx"
     Write-Host ("  compiling {0,-12} " -f $name) -NoNewline
+    $ErrorActionPreference = 'Continue'
     & $pawncc $src "-i$IncludeDir" @Flags "-o$amx" 2>&1 | Out-Null
-    if ($LASTEXITCODE -eq 0 -and (Test-Path $amx)) {
+    $ec = $LASTEXITCODE
+    $ErrorActionPreference = 'Stop'
+    if ($ec -eq 0 -and (Test-Path $amx)) {
         Write-Host ("ok  ({0} bytes)" -f (Get-Item $amx).Length) -ForegroundColor Green
     } else {
         Write-Host "FAILED" -ForegroundColor Red
-        & $pawncc $src "-i$IncludeDir" @Flags "-o$amx"   # re-run to show errors
+        $ErrorActionPreference = 'Continue'
+        & $pawncc $src "-i$IncludeDir" @Flags "-o$amx"
+        $ErrorActionPreference = 'Stop'
         $failed = 1
     }
 }
