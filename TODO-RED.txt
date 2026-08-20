@@ -1,0 +1,12 @@
+A) Use kernel writes to overwrite the trusted signature (k_pubkey_namazso_2023) or add a trusted signature to the list (k_trusted_keys)
+	- D:\Projects\pawnio-test\PawnIO-src\PawnIO\src\vm.cpp:782
+	- Advantage here is that it won't change the checksum disk vs. memory
+
+B) Force return successful status by patching .sys in memory
+	- vm_load_binary_internal in D:\Projects\pawnio-test\PawnIO-src\PawnIO\src\vm.cpp
+	- Can patch in a few places
+	- Disadvantage is that if disk vs. memory is checked, then we will be caught
+
+Interesting files:
+- D:\Projects\pawnio-test\PawnIO-src\PawnIO\src\signature.cpp
+- D:\Projects\pawnio-test\PawnIO-src\PawnIO\src\vm.cpp
